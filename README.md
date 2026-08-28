@@ -23,8 +23,11 @@ O **BairroMais** é uma solução para fortalecer a economia local. O aplicativo
 - **Tipografia:** Poppins / Roboto
 
 ## 👥 Integrantes do Grupo
-- Nome do Integrante 1 (RM / Função)
-- Nome do Integrante 2 (RM / Função)
+- Pedro Henrique dos Santos Cardoso - RM: 563268
+- Gabriel Gibin Leoncio – RM: 565462
+- Rafael do Nascimento Silva – RM: 566263
+- Rai Augusto Ribeiro – RM: 562870
+- Guilherme Morais de Assis - RM: 564198
 
 ## 🛠️ Tecnologias Utilizadas
 - [Flutter](https://flutter.dev/) & [Dart](https://dart.dev/)
