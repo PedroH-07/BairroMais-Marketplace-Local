@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/theme.dart';
 import 'cart_screen.dart';
 
@@ -12,9 +11,6 @@ class StoreDetailsScreen extends StatefulWidget {
 
 class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
   int itemCount = 1;
-
-  // Consulta (query) à tabela 'products' do Supabase para listar os itens da loja
-  final _futureProducts = Supabase.instance.client.from('products').select();
 
   @override
   Widget build(BuildContext context) {
@@ -175,51 +171,22 @@ class _StoreDetailsScreenState extends State<StoreDetailsScreen> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Lista Dinâmica de Produtos vindos do Supabase
-                          FutureBuilder<List<Map<String, dynamic>>>(
-                            future: _futureProducts,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                return const Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(20.0),
-                                    child: CircularProgressIndicator(color: AppTheme.primaryGreen),
-                                  ),
-                                );
-                              }
-
-                              if (snapshot.hasError) {
-                                return Center(child: Text('Erro ao carregar produtos: ${snapshot.error}'));
-                              }
-
-                              if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                                return const Center(child: Text('Nenhum produto disponível no momento.'));
-                              }
-
-                              final products = snapshot.data!;
-
-                              return ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: products.length,
-                                itemBuilder: (context, index) {
-                                  final product = products[index];
-
-                                  final title = product['name'] ?? 'Produto';
-                                  final unit = product['unit'] ?? 'Unidade';
-                                  final priceValue = product['price']?.toString() ?? '0.00';
-                                  final formattedPrice = 'R\$ ${priceValue.replaceAll('.', ',')}';
-                                  final isFirstItem = index == 0;
-
-                                  return _productCard(
-                                    title: title,
-                                    unit: unit,
-                                    price: formattedPrice,
-                                    showCounter: isFirstItem,
-                                  );
-                                },
-                              );
-                            },
+                          // Lista de Produtos
+                          _productCard(
+                            title: 'Couve Manteiga',
+                            unit: 'Maço',
+                            price: 'R\$ 3,50',
+                            showCounter: true,
+                          ),
+                          _productCard(
+                            title: 'Rúcula Orgânica',
+                            unit: 'Bandeja 100g',
+                            price: 'R\$ 5,90',
+                          ),
+                          _productCard(
+                            title: 'Manga Palmer',
+                            unit: 'Unidade ~400g',
+                            price: 'R\$ 4,50',
                           ),
                         ],
                       ),
