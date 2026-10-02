@@ -47,11 +47,12 @@ O **BairroMais** é uma solução para fortalecer a economia local. O aplicativo
 - Rai Augusto Ribeiro — RM: 562870
 - Guilherme Morais de Assis — RM: 564198
 
-<img width="409" height="839" alt="7b3deea0-d6bc-4a41-8695-0c5405c369d7" src="https://github.com/user-attachments/assets/c19b76db-8878-4d98-b568-e7757573a706" />
 
-<img width="399" height="798" alt="Captura de tela 2026-10-02 155923" src="https://github.com/user-attachments/assets/76bd0950-7ac1-42d0-8ca3-ba1094cf2165" />
-
-<img width="382" height="780" alt="Captura de tela 2026-10-02 155952" src="https://github.com/user-attachments/assets/99cdf4c8-f2cf-457a-906c-e1a7a8bacd0b" />
+<p align="center">
+   <img width="280" height="839" alt="7b3deea0-d6bc-4a41-8695-0c5405c369d7" src="https://github.com/user-attachments/assets/c19b76db-8878-4d98-b568-e7757573a706" />
+   <img width="280" height="798" alt="Captura de tela 2026-10-02 155923" src="https://github.com/user-attachments/assets/76bd0950-7ac1-42d0-8ca3-ba1094cf2165" />
+   <img width="280" height="780" alt="Captura de tela 2026-10-02 155952" src="https://github.com/user-attachments/assets/99cdf4c8-f2cf-457a-906c-e1a7a8bacd0b" />
+</p>
 
 
 
