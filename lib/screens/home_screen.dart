@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/theme.dart';
 import 'store_details_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  // Cria a consulta (query) à tabela 'stores' do Supabase
+  final _futureStores = Supabase.instance.client.from('stores').select();
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +179,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // 5. Lista de Comércios
+              // 5. Cabeçalho da Lista de Comércios
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -186,101 +195,154 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
 
-              // Card do Produtor Local com Ação de Clique
-              InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const StoreDetailsScreen(),
-                    ),
+              // 6. Lista Dinâmica de Comércios vindos do Supabase
+              FutureBuilder<List<Map<String, dynamic>>>(
+                future: _futureStores,
+                builder: (context, snapshot) {
+                  // Estado 1: A carregar (Mostra um círculo a girar)
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(20.0),
+                        child: CircularProgressIndicator(color: AppTheme.primaryGreen),
+                      ),
+                    );
+                  }
+
+                  // Estado 2: Erro na ligação
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Erro ao carregar lojas: ${snapshot.error}'));
+                  }
+
+                  // Estado 3: Sucesso, mas não há lojas na base de dados
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('Nenhum comércio encontrado no seu bairro.'));
+                  }
+
+                  // Estado 4: Sucesso! Temos dados.
+                  final stores = snapshot.data!;
+
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: stores.length,
+                    itemBuilder: (context, index) {
+                      final store = stores[index];
+
+                      // Extrair os dados da tabela com segurança
+                      final storeName = store['name'] ?? 'Nome Indisponível';
+                      final storeCategory = store['category'] ?? 'Categoria';
+                      final storeRating = store['rating']?.toString() ?? 'N/A';
+                      final storeDistance = store['distance'] ?? 'Distância N/A';
+                      final storeFee = store['delivery_fee']?.toString() ?? '0.00';
+                      final storeIcon = store['icon'] ?? '🏪';
+
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const StoreDetailsScreen(),
+                              ),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(16),
+                          child: Card(
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              side: BorderSide(color: Colors.grey.shade200),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Stack(
+                                    children: [
+                                      Container(
+                                        height: 120,
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade300,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: const Center(
+                                          child: Icon(Icons.store, size: 50, color: Colors.grey),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        bottom: 8,
+                                        left: 8,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(6),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          // Ícone dinâmico da base de dados
+                                          child: Text(storeIcon, style: const TextStyle(fontSize: 20)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  // Nome dinâmico da loja
+                                  Text(
+                                    storeName,
+                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: AppTheme.primaryGreen.withValues(alpha: 0.1),
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        // Categoria dinâmica
+                                        child: Text(
+                                          storeCategory,
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: AppTheme.primaryGreen,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      const Icon(Icons.star, color: Colors.amber, size: 16),
+                                      const SizedBox(width: 2),
+                                      // Avaliação dinâmica
+                                      Text(storeRating, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
+                                      const SizedBox(width: 2),
+                                      // Distância dinâmica
+                                      Text(storeDistance, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                      const SizedBox(width: 12),
+                                      const Icon(Icons.shopping_bag_outlined, size: 14, color: Colors.grey),
+                                      const SizedBox(width: 2),
+                                      // Taxa de entrega dinâmica
+                                      Text('Entrega R\$ $storeFee', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
-                borderRadius: BorderRadius.circular(16),
-                child: Card(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: Colors.grey.shade200),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Banner da loja com ícone
-                        Stack(
-                          children: [
-                            Container(
-                              height: 120,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade300,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Center(
-                                child: Icon(Icons.store, size: 50, color: Colors.grey),
-                              ),
-                            ),
-                            Positioned(
-                              bottom: 8,
-                              left: 8,
-                              child: Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Text('🥬', style: TextStyle(fontSize: 20)),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Horta & Pomar do Zé',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: AppTheme.primaryGreen.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Text(
-                                'Hortifrúti',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: AppTheme.primaryGreen,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            const Icon(Icons.star, color: Colors.amber, size: 16),
-                            const SizedBox(width: 2),
-                            const Text('4.9', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: const [
-                            Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
-                            SizedBox(width: 2),
-                            Text('A 400m', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                            SizedBox(width: 12),
-                            Icon(Icons.shopping_bag_outlined, size: 14, color: Colors.grey),
-                            SizedBox(width: 2),
-                            Text('Entrega R\$ 3,00', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               ),
             ],
           ),
@@ -302,7 +364,6 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-// Widget utilitário para os cards de categoria
 class _CategoryCard extends StatelessWidget {
   final String icon;
   final String title;
